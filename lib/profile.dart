@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navegacao_entre_telas/qrCode.dart';
 import 'main.dart';
 
@@ -11,9 +14,84 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final TextEditingController nomeController = TextEditingController();
-  final TextEditingController cursoController = TextEditingController();
-  final TextEditingController turmaController = TextEditingController();
   final TextEditingController aniversarioController = TextEditingController();
+
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
+
+  String? cursoSelecionado;
+  String? turmaSelecionada;
+  int? serieSelecionada;
+  String? periodoSelecionado;
+
+  final List<String> cursos = [
+    'Edificações',
+    'Eletroeletrônica',
+    'Informática',
+    'Informática para Internet',
+    'Redes de Computadores',
+    'Telecomunicações',
+  ];
+
+  final List<String> turmas = ['A','B','C','D','E','F','G'];
+  final List<int> series = [1, 2, 3];
+  final List<String> periodos = ['Manhã', 'Tarde', 'Noite'];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    nomeController.text = prefs.getString('nome') ?? '';
+    aniversarioController.text = prefs.getString('aniversario') ?? '';
+
+    final savedCurso = prefs.getString('curso');
+    cursoSelecionado = (savedCurso != null && cursos.contains(savedCurso)) ? savedCurso : null;
+
+    final savedTurma = prefs.getString('turma');
+    turmaSelecionada = (savedTurma != null && turmas.contains(savedTurma)) ? savedTurma : null;
+
+    final savedSerie = prefs.getInt('serie');
+    serieSelecionada = (savedSerie != null && series.contains(savedSerie)) ? savedSerie : null;
+
+    final savedPeriodo = prefs.getString('periodo');
+    periodoSelecionado = (savedPeriodo != null && periodos.contains(savedPeriodo)) ? savedPeriodo : null;
+
+    final imagePath = prefs.getString('profile_image');
+    if (imagePath != null && File(imagePath).existsSync()) {
+      setState(() {
+        _profileImage = File(imagePath);
+      });
+    }
+  }
+
+  Future<void> _saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('nome', nomeController.text);
+    await prefs.setString('aniversario', aniversarioController.text);
+    if (cursoSelecionado != null) await prefs.setString('curso', cursoSelecionado!);
+    if (turmaSelecionada != null) await prefs.setString('turma', turmaSelecionada!);
+    if (serieSelecionada != null) await prefs.setInt('serie', serieSelecionada!);
+    if (periodoSelecionado != null) await prefs.setString('periodo', periodoSelecionado!);
+    if (_profileImage != null) await prefs.setString('profile_image', _profileImage!.path);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Alterações salvas!')),
+    );
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +120,7 @@ class _ProfileState extends State<Profile> {
                 ),
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -52,8 +129,7 @@ class _ProfileState extends State<Profile> {
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(
-                                  builder: (context) => const HomeScreen()),
+                              MaterialPageRoute(builder: (_) => const HomeScreen()),
                             );
                           },
                         ),
@@ -66,13 +142,37 @@ class _ProfileState extends State<Profile> {
                     ),
                   ),
                 ),
-                // Avatar central
+                // Avatar central com Align
                 Positioned(
                   bottom: -75,
-                  left: MediaQuery.of(context).size.width / 2 - 75,
-                  child: const CircleAvatar(
-                    radius: 75,
-                    backgroundImage: AssetImage('assets/images/th.webp'),
+                  left: 0,
+                  right: 0,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: CircleAvatar(
+                        radius: 75,
+                        backgroundImage: _profileImage != null
+                            ? FileImage(_profileImage!)
+                            : const AssetImage('assets/images/th.webp') as ImageProvider,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            padding: const EdgeInsets.all(6),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              size: 22,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -80,7 +180,6 @@ class _ProfileState extends State<Profile> {
 
             const SizedBox(height: 90),
 
-            // Nome e e-mail fixos
             const Text(
               "Nome",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -92,7 +191,7 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 20),
 
-            // Campo Nome completo
+            // Nome completo
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: buildTextField("Nome completo", nomeController),
@@ -103,14 +202,86 @@ class _ProfileState extends State<Profile> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 children: [
-                  Expanded(child: buildTextField("Curso", cursoController)),
-                  const SizedBox(width: 10),
-                  Expanded(child: buildTextField("Turma", turmaController)),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: cursoSelecionado,
+                      decoration: InputDecoration(
+                        labelText: "Curso",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      items: cursos.map((curso) => DropdownMenuItem(
+                        value: curso,
+                        child: Text(curso),
+                      )).toList(),
+                      onChanged: (val) => setState(() => cursoSelecionado = val),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: turmaSelecionada,
+                      decoration: InputDecoration(
+                        labelText: "Turma",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      items: turmas.map((turma) => DropdownMenuItem(
+                        value: turma,
+                        child: Text(turma),
+                      )).toList(),
+                      onChanged: (val) => setState(() => turmaSelecionada = val),
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            // Aniversário (date picker)
+            // Série e Período
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<int>(
+                      value: serieSelecionada,
+                      decoration: InputDecoration(
+                        labelText: "Série",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      items: series.map((s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(s.toString()),
+                      )).toList(),
+                      onChanged: (val) => setState(() => serieSelecionada = val),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: periodoSelecionado,
+                      decoration: InputDecoration(
+                        labelText: "Período",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      items: periodos.map((p) => DropdownMenuItem(
+                        value: p,
+                        child: Text(p),
+                      )).toList(),
+                      onChanged: (val) => setState(() => periodoSelecionado = val),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Aniversário
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: TextField(
@@ -143,11 +314,24 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            // Botão Salvar alterações
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveData,
+                  child: const Text("Salvar alterações"),
+                ),
+              ),
+            ),
           ],
         ),
       ),
 
-      // Rodapé
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         shape: const CircularNotchedRectangle(),
@@ -156,7 +340,6 @@ class _ProfileState extends State<Profile> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Botão Perfil → já está na tela
               IconButton(
                 icon: const Icon(Icons.person_outline),
                 onPressed: () {
@@ -168,7 +351,6 @@ class _ProfileState extends State<Profile> {
                   );
                 },
               ),
-              // Botão Home
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
@@ -184,7 +366,6 @@ class _ProfileState extends State<Profile> {
                   },
                 ),
               ),
-              // Botão QR Code
               IconButton(
                 icon: const Icon(Icons.qr_code_scanner),
                 onPressed: () {
@@ -201,7 +382,6 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  // Função helper para campos editáveis
   Widget buildTextField(String label, TextEditingController controller) {
     return TextField(
       controller: controller,
