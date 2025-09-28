@@ -27,7 +27,7 @@ class _ProfileState extends State<Profile> {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  height: 110,
+                  height: 130,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],

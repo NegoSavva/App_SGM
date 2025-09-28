@@ -12,7 +12,7 @@ class quartaPage extends StatelessWidget {
       body: Column(
         children: [
           // TOPO com gradiente
-           Container(
+            Container(
             padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(

@@ -13,7 +13,7 @@ class TerceiraPage extends StatelessWidget {
         children: [
           // TOPO com gradiente
           Container(
-            padding: const EdgeInsets.only(top: 12, left: 16, right: 16, bottom: 20),
+            padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],

@@ -219,50 +219,61 @@ class HomeScreen extends StatelessWidget {
       body: Column(
         children: [
           // Cabeçalho com gradiente
-          Container(
-            padding:
-                const EdgeInsets.only(top: 12, left: 16, right: 16, bottom: 12),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Image.asset(
-                    'assets/images/fiebof.png',
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Bem-vindo, USER!",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  "Aba inicial",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+      Container(
+  width: double.infinity, // ocupa toda a largura
+  padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+  decoration: const BoxDecoration(
+    gradient: LinearGradient(
+      colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    borderRadius: BorderRadius.only(
+      bottomLeft: Radius.circular(20),
+      bottomRight: Radius.circular(20),
+    ),
+  ),
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      // Textos alinhados à esquerda
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            "Bem-vindo, USER!",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 4),
+          Text(
+            "Aba inicial",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+
+      // Logo à direita
+      Image.asset(
+        'assets/images/fiebof.png',
+        width: 100,
+        height: 100,
+        fit: BoxFit.contain,
+      ),
+    ],
+  ),
+),
+const SizedBox(height: 10),
+
+
+
 
           // Lista de atalhos
           Expanded(

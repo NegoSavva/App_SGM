@@ -17,14 +17,15 @@ class CardapioPage extends StatelessWidget {
       // AppBar personalizada com gradiente
       body: Column(
         children: [
+          // Cabeçalho unificado
           Container(
             height: 120,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(25),
                 bottomRight: Radius.circular(25),
               ),
-        
               gradient: LinearGradient(
                 colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],
                 begin: Alignment.topLeft,
@@ -39,11 +40,13 @@ class CardapioPage extends StatelessWidget {
                     top: 15,
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
-                     onPressed: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => HomeScreen()));
-                },
-              ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => HomeScreen()),
+                        );
+                      },
+                    ),
                   ),
                   const Center(
                     child: Text(
@@ -56,41 +59,39 @@ class CardapioPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                Positioned(
-  right: 15,
-  top: 15,
-  child: Image.asset(
-    'assets/images/fiebof.png',
-    height: 100, // ajusta o tamanho da imagem
-    width: 100,
-    fit: BoxFit.contain,
-  ),
-),
-
+                  Positioned(
+                    right: 15,
+                    top: 10,
+                    child: Image.asset(
+                      'assets/images/fiebof.png',
+                      height: 90, // tamanho ajustado para caber melhor
+                      width: 90,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
 
           // Botões dos dias da semana
-       Expanded(
-  child: ListView(
-    padding: const EdgeInsets.all(20),
-    children: [
-      _buildDayButton(context, "SEGUNDA", const SegundaPage()),
-      _buildDayButton(context, "TERÇA", const TerceiraPage()),
-      _buildDayButton(context, "QUARTA", const quartaPage()),
-      _buildDayButton(context, "QUINTA", const quintaPage()),
-      _buildDayButton(context, "SEXTA", const SextaPage()),
-    ],
-  ),
-),
-
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                _buildDayButton(context, "SEGUNDA", const SegundaPage()),
+                _buildDayButton(context, "TERÇA", const TerceiraPage()),
+                _buildDayButton(context, "QUARTA", const quartaPage()),
+                _buildDayButton(context, "QUINTA", const quintaPage()),
+                _buildDayButton(context, "SEXTA", const SextaPage()),
+              ],
+            ),
+          ),
         ],
       ),
 
       // Bottom Navigation
-  bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         shape: const CircularNotchedRectangle(),
         child: Padding(
@@ -105,7 +106,6 @@ class CardapioPage extends StatelessWidget {
                       context, MaterialPageRoute(builder: (_) => Profile()));
                 },
               ),
-              
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
@@ -135,7 +135,8 @@ class CardapioPage extends StatelessWidget {
     );
   }
 }
-  // Função para criar os botões dos dias
+
+// Função para criar os botões dos dias
 Widget _buildDayButton(BuildContext context, String text, Widget page) {
   return Container(
     margin: const EdgeInsets.symmetric(vertical: 10),
