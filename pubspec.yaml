@@ -12,9 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  image_picker: ^1.0.7
+  file_picker: ^8.0.0
   shared_preferences: ^2.1.0
-
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +29,4 @@ flutter:
     - assets/images/Fieb.webp
     - assets/images/th.webp
     - assets/images/fiebof.png
+    - assets/images/Default_pfp.jpg

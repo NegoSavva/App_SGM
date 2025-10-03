@@ -1,7 +1,12 @@
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart'; // para detectar Web
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:navegacao_entre_telas/qrCode.dart';
 import 'main.dart';
 
@@ -16,8 +21,8 @@ class _ProfileState extends State<Profile> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController aniversarioController = TextEditingController();
 
-  File? _profileImage;
-  final ImagePicker _picker = ImagePicker();
+  File? _profileImageFile;       // usado em Android/iOS/PC
+  Uint8List? _profileImageBytes; // usado em Web
 
   String? cursoSelecionado;
   String? turmaSelecionada;
@@ -28,12 +33,12 @@ class _ProfileState extends State<Profile> {
     'Edificações',
     'Eletroeletrônica',
     'Informática',
-    'Informática para Internet',
+    'Informática p Internet',
     'Redes de Computadores',
     'Telecomunicações',
   ];
 
-  final List<String> turmas = ['A','B','C','D','E','F','G'];
+  final List<String> turmas = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
   final List<int> series = [1, 2, 3];
   final List<String> periodos = ['Manhã', 'Tarde', 'Noite'];
 
@@ -49,22 +54,37 @@ class _ProfileState extends State<Profile> {
     aniversarioController.text = prefs.getString('aniversario') ?? '';
 
     final savedCurso = prefs.getString('curso');
-    cursoSelecionado = (savedCurso != null && cursos.contains(savedCurso)) ? savedCurso : null;
+    cursoSelecionado =
+        (savedCurso != null && cursos.contains(savedCurso)) ? savedCurso : null;
 
     final savedTurma = prefs.getString('turma');
-    turmaSelecionada = (savedTurma != null && turmas.contains(savedTurma)) ? savedTurma : null;
+    turmaSelecionada =
+        (savedTurma != null && turmas.contains(savedTurma)) ? savedTurma : null;
 
     final savedSerie = prefs.getInt('serie');
-    serieSelecionada = (savedSerie != null && series.contains(savedSerie)) ? savedSerie : null;
+    serieSelecionada =
+        (savedSerie != null && series.contains(savedSerie)) ? savedSerie : null;
 
     final savedPeriodo = prefs.getString('periodo');
-    periodoSelecionado = (savedPeriodo != null && periodos.contains(savedPeriodo)) ? savedPeriodo : null;
+    periodoSelecionado = (savedPeriodo != null && periodos.contains(savedPeriodo))
+        ? savedPeriodo
+        : null;
 
-    final imagePath = prefs.getString('profile_image');
-    if (imagePath != null && File(imagePath).existsSync()) {
-      setState(() {
-        _profileImage = File(imagePath);
-      });
+    // Carregar imagem salva
+    if (kIsWeb) {
+      final base64Image = prefs.getString('profile_image_web');
+      if (base64Image != null) {
+        setState(() {
+          _profileImageBytes = base64Decode(base64Image);
+        });
+      }
+    } else {
+      final imagePath = prefs.getString('profile_image');
+      if (imagePath != null && File(imagePath).existsSync()) {
+        setState(() {
+          _profileImageFile = File(imagePath);
+        });
+      }
     }
   }
 
@@ -72,11 +92,25 @@ class _ProfileState extends State<Profile> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('nome', nomeController.text);
     await prefs.setString('aniversario', aniversarioController.text);
-    if (cursoSelecionado != null) await prefs.setString('curso', cursoSelecionado!);
-    if (turmaSelecionada != null) await prefs.setString('turma', turmaSelecionada!);
-    if (serieSelecionada != null) await prefs.setInt('serie', serieSelecionada!);
-    if (periodoSelecionado != null) await prefs.setString('periodo', periodoSelecionado!);
-    if (_profileImage != null) await prefs.setString('profile_image', _profileImage!.path);
+    if (cursoSelecionado != null) {
+      await prefs.setString('curso', cursoSelecionado!);
+    }
+    if (turmaSelecionada != null) {
+      await prefs.setString('turma', turmaSelecionada!);
+    }
+    if (serieSelecionada != null) {
+      await prefs.setInt('serie', serieSelecionada!);
+    }
+    if (periodoSelecionado != null) {
+      await prefs.setString('periodo', periodoSelecionado!);
+    }
+
+    if (kIsWeb && _profileImageBytes != null) {
+      String base64Image = base64Encode(_profileImageBytes!);
+      await prefs.setString('profile_image_web', base64Image);
+    } else if (_profileImageFile != null) {
+      await prefs.setString('profile_image', _profileImageFile!.path);
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Alterações salvas!')),
@@ -84,23 +118,42 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.image);
+
+    if (result != null) {
+      if (kIsWeb) {
+        setState(() {
+          _profileImageBytes = result.files.first.bytes;
+        });
+      } else {
+        if (result.files.single.path != null) {
+          setState(() {
+            _profileImageFile = File(result.files.single.path!);
+          });
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider avatarImage;
+
+    if (_profileImageFile != null) {
+      avatarImage = FileImage(_profileImageFile!);
+    } else if (_profileImageBytes != null) {
+      avatarImage = MemoryImage(_profileImageBytes!);
+    } else {
+      avatarImage = const AssetImage('assets/images/Default_pfp.jpg');
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Cabeçalho com gradiente + logo + botão voltar
+            // Cabeçalho
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -120,7 +173,8 @@ class _ProfileState extends State<Profile> {
                 ),
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -129,7 +183,8 @@ class _ProfileState extends State<Profile> {
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => const HomeScreen()),
+                              MaterialPageRoute(
+                                  builder: (_) => const HomeScreen()),
                             );
                           },
                         ),
@@ -142,7 +197,6 @@ class _ProfileState extends State<Profile> {
                     ),
                   ),
                 ),
-                // Avatar central com Align
                 Positioned(
                   bottom: -75,
                   left: 0,
@@ -153,9 +207,7 @@ class _ProfileState extends State<Profile> {
                       onTap: _pickImage,
                       child: CircleAvatar(
                         radius: 75,
-                        backgroundImage: _profileImage != null
-                            ? FileImage(_profileImage!)
-                            : const AssetImage('assets/images/th.webp') as ImageProvider,
+                        backgroundImage: avatarImage,
                         child: Align(
                           alignment: Alignment.bottomRight,
                           child: Container(
@@ -191,7 +243,7 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 20),
 
-            // Nome completo
+            // Nome
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: buildTextField("Nome completo", nomeController),
@@ -211,10 +263,12 @@ class _ProfileState extends State<Profile> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      items: cursos.map((curso) => DropdownMenuItem(
-                        value: curso,
-                        child: Text(curso),
-                      )).toList(),
+                      items: cursos
+                          .map((curso) => DropdownMenuItem(
+                                value: curso,
+                                child: Text(curso),
+                              ))
+                          .toList(),
                       onChanged: (val) => setState(() => cursoSelecionado = val),
                     ),
                   ),
@@ -228,10 +282,12 @@ class _ProfileState extends State<Profile> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      items: turmas.map((turma) => DropdownMenuItem(
-                        value: turma,
-                        child: Text(turma),
-                      )).toList(),
+                      items: turmas
+                          .map((turma) => DropdownMenuItem(
+                                value: turma,
+                                child: Text(turma),
+                              ))
+                          .toList(),
                       onChanged: (val) => setState(() => turmaSelecionada = val),
                     ),
                   ),
@@ -253,11 +309,14 @@ class _ProfileState extends State<Profile> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      items: series.map((s) => DropdownMenuItem(
-                        value: s,
-                        child: Text(s.toString()),
-                      )).toList(),
-                      onChanged: (val) => setState(() => serieSelecionada = val),
+                      items: series
+                          .map((s) => DropdownMenuItem(
+                                value: s,
+                                child: Text(s.toString()),
+                              ))
+                          .toList(),
+                      onChanged: (val) =>
+                          setState(() => serieSelecionada = val),
                     ),
                   ),
                   const SizedBox(width: 5),
@@ -270,11 +329,14 @@ class _ProfileState extends State<Profile> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      items: periodos.map((p) => DropdownMenuItem(
-                        value: p,
-                        child: Text(p),
-                      )).toList(),
-                      onChanged: (val) => setState(() => periodoSelecionado = val),
+                      items: periodos
+                          .map((p) => DropdownMenuItem(
+                                value: p,
+                                child: Text(p),
+                              ))
+                          .toList(),
+                      onChanged: (val) =>
+                          setState(() => periodoSelecionado = val),
                     ),
                   ),
                 ],
@@ -317,7 +379,7 @@ class _ProfileState extends State<Profile> {
 
             const SizedBox(height: 20),
 
-            // Botão Salvar alterações
+            // Botão salvar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: SizedBox(
