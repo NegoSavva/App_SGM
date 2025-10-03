@@ -189,7 +189,7 @@ class _ProfileState extends State<Profile> {
                           },
                         ),
                         Image.asset(
-                          'assets/images/fiebof.png',
+                          'assets/images/Imagem.png',
                           width: 100,
                           height: 100,
                         ),

@@ -262,7 +262,7 @@ class HomeScreen extends StatelessWidget {
 
       // Logo à direita
       Image.asset(
-        'assets/images/fiebof.png',
+        'assets/images/Imagem.png',
         width: 100,
         height: 100,
         fit: BoxFit.contain,

@@ -43,7 +43,7 @@ class SegundaPage extends StatelessWidget {
                   ),
                 ),
   Image.asset(
-                  'assets/images/fiebof.png', // caminho da sua logo
+                  'assets/images/Imagem.png', // caminho da sua logo
                   width: 100,
                   height: 100,
               fit: BoxFit.contain,

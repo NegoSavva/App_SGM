@@ -28,94 +28,108 @@ class DesperdicioZeroPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: AppBar(
-          automaticallyImplyLeading: false, // seta padrão desativada
-          flexibleSpace: Container(
-            padding: const EdgeInsets.only(
-              top: 30, // 🔹 diminuí o padding para não "esconder" a seta
-              left: 8,
-              right: 8,
-              bottom: 10,
-            ),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const HomeScreen()),
-                    );
-                  },
-                ),
-                Image.asset(
-                  'assets/images/fiebof.png',
-                  width: 100,
-                  height: 100,
-                ),
-              ],
-            ),
+
+      // 🔹 CABEÇALHO UNIFICADO (substitui o AppBar anterior)
+      body: Column(
+        children: [
+         Container(
+  height: 120,
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  decoration: const BoxDecoration(
+    borderRadius: BorderRadius.only(
+      bottomLeft: Radius.circular(25),
+      bottomRight: Radius.circular(25),
+    ),
+    gradient: LinearGradient(
+      colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+  ),
+  child: SafeArea(
+    child: Stack(
+      children: [
+        // Botão de voltar à esquerda
+        Positioned(
+          left: 10,
+          top: 15,
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+              );
+            },
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            const Text(
-              "DESPERDÍCIO",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const Text(
-              "ZERO",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Image.asset(
-              'assets/images/ODS-12-2.webp',
-              width: 100,
-            ),
-            const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                "A comida que jogamos fora representa não só recursos preciosos desperdiçados, "
-                "mas também a negação de alimento a alguém mais necessitado. Devemos lembrar "
-                "que cada mordida que não consumimos tem um custo - um custo para o meio ambiente, "
-                "para nossa consciência e para aqueles que lutam para colocar comida em suas mesas.",
-                textAlign: TextAlign.justify,
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.5,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-          ],
+        // Logo à direita
+        Positioned(
+          right: 10,
+          top: 15,
+          child: Image.asset(
+            'assets/images/Imagem.png',
+            width: 100,
+            height: 100,
+          ),
         ),
+      ],
+    ),
+  ),
+),
+
+
+          // 🔹 CONTEÚDO PRINCIPAL
+          Expanded(
+            child: SafeArea(
+              child: Column(
+                children: [
+                  const SizedBox(height: 16),
+                  const Text(
+                    "DESPERDÍCIO",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const Text(
+                    "ZERO",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Image.asset(
+                    'assets/images/ODS-12-2.webp',
+                    width: 100,
+                  ),
+                  const SizedBox(height: 16),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Text(
+                      "A comida que jogamos fora representa não só recursos preciosos desperdiçados, "
+                      "mas também a negação de alimento a alguém mais necessitado. Devemos lembrar "
+                      "que cada mordida que não consumimos tem um custo - um custo para o meio ambiente, "
+                      "para nossa consciência e para aqueles que lutam para colocar comida em suas mesas.",
+                      textAlign: TextAlign.justify,
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.5,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
+
+      // 🔹 BARRA DE NAVEGAÇÃO INFERIOR
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         shape: const CircularNotchedRectangle(),

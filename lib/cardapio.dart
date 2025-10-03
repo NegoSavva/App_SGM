@@ -63,7 +63,7 @@ class CardapioPage extends StatelessWidget {
                     right: 15,
                     top: 10,
                     child: Image.asset(
-                      'assets/images/fiebof.png',
+                      'assets/images/Imagem.png',
                       height: 90, // tamanho ajustado para caber melhor
                       width: 90,
                       fit: BoxFit.contain,
