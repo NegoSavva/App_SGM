@@ -5,8 +5,22 @@ import 'package:navegacao_entre_telas/desperdicio_zero.dart';
 import 'package:navegacao_entre_telas/form1.dart';
 import 'package:navegacao_entre_telas/profile.dart';
 import 'package:navegacao_entre_telas/qrCode.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔹 Limpa os dados do perfil sempre que o app for fechado e aberto novamente
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('nome');
+  await prefs.remove('aniversario');
+  await prefs.remove('curso');
+  await prefs.remove('turma');
+  await prefs.remove('serie');
+  await prefs.remove('periodo');
+  await prefs.remove('profile_image');
+  await prefs.remove('profile_image_web');
+
   runApp(const MyApp());
 }
 
@@ -219,61 +233,55 @@ class HomeScreen extends StatelessWidget {
       body: Column(
         children: [
           // Cabeçalho com gradiente
-      Container(
-  width: double.infinity, // ocupa toda a largura
-  padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-  decoration: const BoxDecoration(
-    gradient: LinearGradient(
-      colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    ),
-    borderRadius: BorderRadius.only(
-      bottomLeft: Radius.circular(20),
-      bottomRight: Radius.circular(20),
-    ),
-  ),
-  child: Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      // Textos alinhados à esquerda
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
-            "Bem-vindo, USER!",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF6BA4F8), Color(0xFFB3D2FF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      "Bem-vindo, USER!",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      "Aba inicial",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Image.asset(
+                  'assets/images/Imagem.png',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.contain,
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 4),
-          Text(
-            "Aba inicial",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-
-      // Logo à direita
-      Image.asset(
-        'assets/images/Imagem.png',
-        width: 100,
-        height: 100,
-        fit: BoxFit.contain,
-      ),
-    ],
-  ),
-),
-const SizedBox(height: 10),
-
-
-
+          const SizedBox(height: 10),
 
           // Lista de atalhos
           Expanded(

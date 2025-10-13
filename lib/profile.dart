@@ -173,13 +173,14 @@ class _ProfileState extends State<Profile> {
                 ),
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          icon:
+                              const Icon(Icons.arrow_back, color: Colors.white),
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
@@ -252,94 +253,190 @@ class _ProfileState extends State<Profile> {
             // Curso e Turma
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: cursoSelecionado,
-                      decoration: InputDecoration(
-                        labelText: "Curso",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      items: cursos
-                          .map((curso) => DropdownMenuItem(
-                                value: curso,
-                                child: Text(curso),
-                              ))
-                          .toList(),
-                      onChanged: (val) => setState(() => cursoSelecionado = val),
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: turmaSelecionada,
-                      decoration: InputDecoration(
-                        labelText: "Turma",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      items: turmas
-                          .map((turma) => DropdownMenuItem(
-                                value: turma,
-                                child: Text(turma),
-                              ))
-                          .toList(),
-                      onChanged: (val) => setState(() => turmaSelecionada = val),
-                    ),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return constraints.maxWidth < 400
+                      ? Column(
+                          children: [
+                            DropdownButtonFormField<String>(
+                              value: cursoSelecionado,
+                              decoration: InputDecoration(
+                                labelText: "Curso",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              items: cursos
+                                  .map((curso) => DropdownMenuItem(
+                                        value: curso,
+                                        child: Text(
+                                          curso,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ))
+                                  .toList(),
+                              onChanged: (val) =>
+                                  setState(() => cursoSelecionado = val),
+                            ),
+                            const SizedBox(height: 10),
+                            DropdownButtonFormField<String>(
+                              value: turmaSelecionada,
+                              decoration: InputDecoration(
+                                labelText: "Turma",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              items: turmas
+                                  .map((turma) => DropdownMenuItem(
+                                        value: turma,
+                                        child: Text(turma),
+                                      ))
+                                  .toList(),
+                              onChanged: (val) =>
+                                  setState(() => turmaSelecionada = val),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: cursoSelecionado,
+                                decoration: InputDecoration(
+                                  labelText: "Curso",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                items: cursos
+                                    .map((curso) => DropdownMenuItem(
+                                          value: curso,
+                                          child: Text(
+                                            curso,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ))
+                                    .toList(),
+                                onChanged: (val) =>
+                                    setState(() => cursoSelecionado = val),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: turmaSelecionada,
+                                decoration: InputDecoration(
+                                  labelText: "Turma",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                items: turmas
+                                    .map((turma) => DropdownMenuItem(
+                                          value: turma,
+                                          child: Text(turma),
+                                        ))
+                                    .toList(),
+                                onChanged: (val) =>
+                                    setState(() => turmaSelecionada = val),
+                              ),
+                            ),
+                          ],
+                        );
+                },
               ),
             ),
 
             // Série e Período
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<int>(
-                      value: serieSelecionada,
-                      decoration: InputDecoration(
-                        labelText: "Série",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      items: series
-                          .map((s) => DropdownMenuItem(
-                                value: s,
-                                child: Text(s.toString()),
-                              ))
-                          .toList(),
-                      onChanged: (val) =>
-                          setState(() => serieSelecionada = val),
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: periodoSelecionado,
-                      decoration: InputDecoration(
-                        labelText: "Período",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      items: periodos
-                          .map((p) => DropdownMenuItem(
-                                value: p,
-                                child: Text(p),
-                              ))
-                          .toList(),
-                      onChanged: (val) =>
-                          setState(() => periodoSelecionado = val),
-                    ),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return constraints.maxWidth < 400
+                      ? Column(
+                          children: [
+                            DropdownButtonFormField<int>(
+                              value: serieSelecionada,
+                              decoration: InputDecoration(
+                                labelText: "Série",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              items: series
+                                  .map((s) => DropdownMenuItem(
+                                        value: s,
+                                        child: Text(s.toString()),
+                                      ))
+                                  .toList(),
+                              onChanged: (val) =>
+                                  setState(() => serieSelecionada = val),
+                            ),
+                            const SizedBox(height: 10),
+                            DropdownButtonFormField<String>(
+                              value: periodoSelecionado,
+                              decoration: InputDecoration(
+                                labelText: "Período",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              items: periodos
+                                  .map((p) => DropdownMenuItem(
+                                        value: p,
+                                        child: Text(p),
+                                      ))
+                                  .toList(),
+                              onChanged: (val) =>
+                                  setState(() => periodoSelecionado = val),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<int>(
+                                value: serieSelecionada,
+                                decoration: InputDecoration(
+                                  labelText: "Série",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                items: series
+                                    .map((s) => DropdownMenuItem(
+                                          value: s,
+                                          child: Text(s.toString()),
+                                        ))
+                                    .toList(),
+                                onChanged: (val) =>
+                                    setState(() => serieSelecionada = val),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: periodoSelecionado,
+                                decoration: InputDecoration(
+                                  labelText: "Período",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                items: periodos
+                                    .map((p) => DropdownMenuItem(
+                                          value: p,
+                                          child: Text(p),
+                                        ))
+                                    .toList(),
+                                onChanged: (val) =>
+                                    setState(() => periodoSelecionado = val),
+                              ),
+                            ),
+                          ],
+                        );
+                },
               ),
             ),
 
