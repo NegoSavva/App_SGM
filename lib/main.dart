@@ -38,6 +38,7 @@ class LoginAnimationPage extends StatefulWidget {
 
 class _LoginAnimationPageState extends State<LoginAnimationPage> {
   bool _showLogin = false;
+  bool _obscureSenha = true; // controla a visibilidade da senha
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
@@ -63,7 +64,6 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim();
 
-      // 🔹 Guarda o e-mail em memória temporária
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('usuarioEmail', email);
 
@@ -82,10 +82,10 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset('assets/cod.png', fit: BoxFit.cover),
+          Image.asset('assets/images/ovo.png', fit: BoxFit.cover), // fundo com imagem
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
-            child: Container(color: Colors.black.withOpacity(0.2)),
+            child: Container(color: Colors.black.withOpacity(0.2)), // desfoque com opacidade
           ),
           Center(
             child: Text(
@@ -106,9 +106,9 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
             height: height * 0.6,
             child: Container(
               padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade100, // azul bebê para o container de login
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
               ),
               child: SingleChildScrollView(
                 child: Form(
@@ -139,8 +139,7 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Informe seu e-mail';
-                          } else if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$')
-                              .hasMatch(value)) {
+                          } else if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$').hasMatch(value)) {
                             return 'E-mail inválido';
                           }
                           return null;
@@ -149,13 +148,23 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
                       const SizedBox(height: 20),
                       TextFormField(
                         controller: _senhaController,
-                        obscureText: true,
+                        obscureText: _obscureSenha,
                         decoration: InputDecoration(
                           labelText: 'Senha',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureSenha ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscureSenha = !_obscureSenha;
+                              });
+                            },
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -204,6 +213,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? emailUsuario;
+  String primeiroNome = "Usuário";
 
   @override
   void initState() {
@@ -213,8 +223,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _carregarEmail() async {
     final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('usuarioEmail');
     setState(() {
-      emailUsuario = prefs.getString('usuarioEmail');
+      emailUsuario = email;
+
+      if (email == 'RM90322@estudante.fieb.edu.br') {
+        primeiroNome = 'João';
+      } else if (email == 'RM90331@estudante.fieb.edu.br') {
+        primeiroNome = 'Kaun';
+      } else {
+        primeiroNome = 'Usuário';
+      }
     });
   }
 
@@ -224,7 +243,6 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Cabeçalho
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
@@ -246,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Bem-vindo, ${emailUsuario ?? "USER"}!",
+                      "Bem-vindo, $primeiroNome!",
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                     const SizedBox(height: 4),
@@ -269,8 +287,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 10),
-
-          // Lista de atalhos
           Expanded(
             child: ListView(
               children: [
@@ -282,21 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const DesperdicioZeroPage()),
-                    );
-                  },
-                ),
-                _buildShortcut(
-                  icon: Icons.restaurant_menu,
-                  color: Colors.red,
-                  title: "Cardápio",
-                  subtitle: "Descritivo dos dias",
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const CardapioPage()),
+                      MaterialPageRoute(builder: (context) => const DesperdicioZeroPage()),
                     );
                   },
                 ),
@@ -308,8 +310,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const AvaliacaoPage()),
+                      MaterialPageRoute(builder: (context) => const AvaliacaoPage()),
+                    );
+                  },
+                ),
+                _buildShortcut(
+                  icon: Icons.restaurant_menu,
+                  color: Colors.red,
+                  title: "Cardápio",
+                  subtitle: "Descritivo dos dias",
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CardapioPage()),
                     );
                   },
                 ),
@@ -318,7 +331,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         shape: const CircularNotchedRectangle(),
@@ -327,23 +339,20 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-             IconButton(
-  icon: const Icon(Icons.person_outline),
-  onPressed: () async {
-    // Pega o e-mail salvo no SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('usuarioEmail');
+              IconButton(
+                icon: const Icon(Icons.person_outline),
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final email = prefs.getString('usuarioEmail');
 
-    // Abre a tela de Profile passando o e-mail
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Profile(email: email ?? ''),
-      ),
-    );
-  },
-),
-
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Profile(email: email ?? ''),
+                    ),
+                  );
+                },
+              ),
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
@@ -354,8 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomeScreen()),
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
                     );
                   },
                 ),
