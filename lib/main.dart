@@ -9,18 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 🔹 Limpa os dados do perfil sempre que o app for fechado e aberto novamente
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('nome');
-  await prefs.remove('aniversario');
-  await prefs.remove('curso');
-  await prefs.remove('turma');
-  await prefs.remove('serie');
-  await prefs.remove('periodo');
-  await prefs.remove('profile_image');
-  await prefs.remove('profile_image_web');
-
   runApp(const MyApp());
 }
 
@@ -32,14 +20,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'SGM',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const LoginAnimationPage(), // 🔑 Tela inicial
+      home: const LoginAnimationPage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 /// ============================
-/// Tela de Login com Animação
+/// Tela de Login
 /// ============================
 class LoginAnimationPage extends StatefulWidget {
   const LoginAnimationPage({super.key});
@@ -69,6 +57,21 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
     _emailController.dispose();
     _senhaController.dispose();
     super.dispose();
+  }
+
+  Future<void> _login() async {
+    if (_formKey.currentState!.validate()) {
+      final email = _emailController.text.trim();
+
+      // 🔹 Guarda o e-mail em memória temporária
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('usuarioEmail', email);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
   }
 
   @override
@@ -165,16 +168,7 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomeScreen(),
-                              ),
-                            );
-                          }
-                        },
+                        onPressed: _login,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -201,29 +195,27 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
 /// ============================
 /// Tela Principal (HomeScreen)
 /// ============================
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  Widget _buildShortcut({
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withOpacity(0.1),
-        child: Icon(icon, color: color),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: onTap,
-    );
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? emailUsuario;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarEmail();
+  }
+
+  Future<void> _carregarEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      emailUsuario = prefs.getString('usuarioEmail');
+    });
   }
 
   @override
@@ -232,7 +224,7 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Cabeçalho com gradiente
+          // Cabeçalho
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
@@ -248,21 +240,17 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      "Bem-vindo, USER!",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                      "Bem-vindo, ${emailUsuario ?? "USER"}!",
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
-                    SizedBox(height: 4),
-                    Text(
+                    const SizedBox(height: 4),
+                    const Text(
                       "Aba inicial",
                       style: TextStyle(
                         color: Colors.white,
@@ -276,7 +264,6 @@ class HomeScreen extends StatelessWidget {
                   'assets/images/Imagem.png',
                   width: 100,
                   height: 100,
-                  fit: BoxFit.contain,
                 ),
               ],
             ),
@@ -332,7 +319,6 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
 
-      // Barra inferior
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         shape: const CircularNotchedRectangle(),
@@ -341,15 +327,23 @@ class HomeScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                icon: const Icon(Icons.person_outline),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Profile()),
-                  );
-                },
-              ),
+             IconButton(
+  icon: const Icon(Icons.person_outline),
+  onPressed: () async {
+    // Pega o e-mail salvo no SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('usuarioEmail');
+
+    // Abre a tela de Profile passando o e-mail
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Profile(email: email ?? ''),
+      ),
+    );
+  },
+),
+
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
@@ -379,6 +373,25 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildShortcut({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: color.withOpacity(0.1),
+        child: Icon(icon, color: color),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: onTap,
     );
   }
 }

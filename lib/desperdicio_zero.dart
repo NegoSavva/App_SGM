@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navegacao_entre_telas/profile.dart';
 import 'package:navegacao_entre_telas/qrCode.dart';
 import 'package:navegacao_entre_telas/qrcodeinfo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
 import 'qrcode.dart'; // certifique-se de importar a tela de QR code
 
@@ -138,13 +139,23 @@ class DesperdicioZeroPage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                icon: const Icon(Icons.person_outline),
-                onPressed: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => const Profile()));
-                },
-              ),
+            IconButton(
+  icon: const Icon(Icons.person_outline),
+  onPressed: () async {
+    // 1️⃣ Pega o e-mail salvo no SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('usuarioEmail');
+
+    // 2️⃣ Navega para a tela de Profile passando o e-mail
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Profile(email: email ?? ''),
+      ),
+    );
+  },
+),
+
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,

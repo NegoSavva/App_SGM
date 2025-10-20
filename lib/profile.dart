@@ -1,17 +1,16 @@
 import 'dart:io';
-import 'dart:convert';
 import 'dart:typed_data';
-
-import 'package:flutter/foundation.dart'; // para detectar Web
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:navegacao_entre_telas/qrCode.dart';
 import 'main.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({super.key});
+  final String? email;
+
+  const Profile({super.key, required this.email});
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -21,8 +20,8 @@ class _ProfileState extends State<Profile> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController aniversarioController = TextEditingController();
 
-  File? _profileImageFile;       // usado em Android/iOS/PC
-  Uint8List? _profileImageBytes; // usado em Web
+  File? _profileImageFile;
+  Uint8List? _profileImageBytes;
 
   String? cursoSelecionado;
   String? turmaSelecionada;
@@ -45,76 +44,33 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _carregarDadosPorEmail();
   }
 
-  Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    nomeController.text = prefs.getString('nome') ?? '';
-    aniversarioController.text = prefs.getString('aniversario') ?? '';
-
-    final savedCurso = prefs.getString('curso');
-    cursoSelecionado =
-        (savedCurso != null && cursos.contains(savedCurso)) ? savedCurso : null;
-
-    final savedTurma = prefs.getString('turma');
-    turmaSelecionada =
-        (savedTurma != null && turmas.contains(savedTurma)) ? savedTurma : null;
-
-    final savedSerie = prefs.getInt('serie');
-    serieSelecionada =
-        (savedSerie != null && series.contains(savedSerie)) ? savedSerie : null;
-
-    final savedPeriodo = prefs.getString('periodo');
-    periodoSelecionado = (savedPeriodo != null && periodos.contains(savedPeriodo))
-        ? savedPeriodo
-        : null;
-
-    // Carregar imagem salva
-    if (kIsWeb) {
-      final base64Image = prefs.getString('profile_image_web');
-      if (base64Image != null) {
-        setState(() {
-          _profileImageBytes = base64Decode(base64Image);
-        });
-      }
+  void _carregarDadosPorEmail() {
+    // 🔹 Lógica para alterar as informações conforme o e-mail do login
+    if (widget.email == 'RM90322@estudante.fieb.edu.br') {
+      nomeController.text = "João Vitor Macena Nicolay";
+      aniversarioController.text = "06/06/2007";
+      cursoSelecionado = "Informática";
+      turmaSelecionada = "C";
+      serieSelecionada = 3;
+      periodoSelecionado = "Manhã";
+    } else if (widget.email == 'RM90309@estudante.fieb.edu.br') {
+      nomeController.text = "Gustavo Ferreira dos Santos Primo";
+      aniversarioController.text = "31/03/2008";
+      cursoSelecionado = "Informática";
+      turmaSelecionada = "C";
+      serieSelecionada = 3;
+      periodoSelecionado = "Manhã";
     } else {
-      final imagePath = prefs.getString('profile_image');
-      if (imagePath != null && File(imagePath).existsSync()) {
-        setState(() {
-          _profileImageFile = File(imagePath);
-        });
-      }
+      nomeController.text = "Usuário Desconhecido";
+      aniversarioController.text = "--/--/----";
+      cursoSelecionado = "Informática";
+      turmaSelecionada = "A";
+      serieSelecionada = 1;
+      periodoSelecionado = "Manhã";
     }
-  }
-
-  Future<void> _saveData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('nome', nomeController.text);
-    await prefs.setString('aniversario', aniversarioController.text);
-    if (cursoSelecionado != null) {
-      await prefs.setString('curso', cursoSelecionado!);
-    }
-    if (turmaSelecionada != null) {
-      await prefs.setString('turma', turmaSelecionada!);
-    }
-    if (serieSelecionada != null) {
-      await prefs.setInt('serie', serieSelecionada!);
-    }
-    if (periodoSelecionado != null) {
-      await prefs.setString('periodo', periodoSelecionado!);
-    }
-
-    if (kIsWeb && _profileImageBytes != null) {
-      String base64Image = base64Encode(_profileImageBytes!);
-      await prefs.setString('profile_image_web', base64Image);
-    } else if (_profileImageFile != null) {
-      await prefs.setString('profile_image', _profileImageFile!.path);
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Alterações salvas!')),
-    );
   }
 
   Future<void> _pickImage() async {
@@ -238,9 +194,9 @@ class _ProfileState extends State<Profile> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            const Text(
-              "RM00000@estudante.fieb.edu.br",
-              style: TextStyle(color: Colors.grey),
+            Text(
+              widget.email ?? "",
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 20),
 
@@ -258,90 +214,20 @@ class _ProfileState extends State<Profile> {
                   return constraints.maxWidth < 400
                       ? Column(
                           children: [
-                            DropdownButtonFormField<String>(
-                              value: cursoSelecionado,
-                              decoration: InputDecoration(
-                                labelText: "Curso",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              items: cursos
-                                  .map((curso) => DropdownMenuItem(
-                                        value: curso,
-                                        child: Text(
-                                          curso,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ))
-                                  .toList(),
-                              onChanged: (val) =>
-                                  setState(() => cursoSelecionado = val),
-                            ),
+                            buildDropdown("Curso", cursoSelecionado, cursos),
                             const SizedBox(height: 10),
-                            DropdownButtonFormField<String>(
-                              value: turmaSelecionada,
-                              decoration: InputDecoration(
-                                labelText: "Turma",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              items: turmas
-                                  .map((turma) => DropdownMenuItem(
-                                        value: turma,
-                                        child: Text(turma),
-                                      ))
-                                  .toList(),
-                              onChanged: (val) =>
-                                  setState(() => turmaSelecionada = val),
-                            ),
+                            buildDropdown("Turma", turmaSelecionada, turmas),
                           ],
                         )
                       : Row(
                           children: [
                             Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: cursoSelecionado,
-                                decoration: InputDecoration(
-                                  labelText: "Curso",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                items: cursos
-                                    .map((curso) => DropdownMenuItem(
-                                          value: curso,
-                                          child: Text(
-                                            curso,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ))
-                                    .toList(),
-                                onChanged: (val) =>
-                                    setState(() => cursoSelecionado = val),
-                              ),
-                            ),
+                                child: buildDropdown(
+                                    "Curso", cursoSelecionado, cursos)),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: turmaSelecionada,
-                                decoration: InputDecoration(
-                                  labelText: "Turma",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                items: turmas
-                                    .map((turma) => DropdownMenuItem(
-                                          value: turma,
-                                          child: Text(turma),
-                                        ))
-                                    .toList(),
-                                onChanged: (val) =>
-                                    setState(() => turmaSelecionada = val),
-                              ),
-                            ),
+                                child: buildDropdown(
+                                    "Turma", turmaSelecionada, turmas)),
                           ],
                         );
                 },
@@ -351,122 +237,27 @@ class _ProfileState extends State<Profile> {
             // Série e Período
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return constraints.maxWidth < 400
-                      ? Column(
-                          children: [
-                            DropdownButtonFormField<int>(
-                              value: serieSelecionada,
-                              decoration: InputDecoration(
-                                labelText: "Série",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              items: series
-                                  .map((s) => DropdownMenuItem(
-                                        value: s,
-                                        child: Text(s.toString()),
-                                      ))
-                                  .toList(),
-                              onChanged: (val) =>
-                                  setState(() => serieSelecionada = val),
-                            ),
-                            const SizedBox(height: 10),
-                            DropdownButtonFormField<String>(
-                              value: periodoSelecionado,
-                              decoration: InputDecoration(
-                                labelText: "Período",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              items: periodos
-                                  .map((p) => DropdownMenuItem(
-                                        value: p,
-                                        child: Text(p),
-                                      ))
-                                  .toList(),
-                              onChanged: (val) =>
-                                  setState(() => periodoSelecionado = val),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Expanded(
-                              child: DropdownButtonFormField<int>(
-                                value: serieSelecionada,
-                                decoration: InputDecoration(
-                                  labelText: "Série",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                items: series
-                                    .map((s) => DropdownMenuItem(
-                                          value: s,
-                                          child: Text(s.toString()),
-                                        ))
-                                    .toList(),
-                                onChanged: (val) =>
-                                    setState(() => serieSelecionada = val),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: periodoSelecionado,
-                                decoration: InputDecoration(
-                                  labelText: "Período",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                items: periodos
-                                    .map((p) => DropdownMenuItem(
-                                          value: p,
-                                          child: Text(p),
-                                        ))
-                                    .toList(),
-                                onChanged: (val) =>
-                                    setState(() => periodoSelecionado = val),
-                              ),
-                            ),
-                          ],
-                        );
-                },
+              child: Row(
+                children: [
+                  Expanded(
+                      child: buildDropdownInt(
+                          "Série", serieSelecionada, series)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                      child: buildDropdown(
+                          "Período", periodoSelecionado, periodos)),
+                ],
               ),
             ),
 
-            // Aniversário
+            // Data de nascimento
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: TextField(
                 controller: aniversarioController,
                 readOnly: true,
                 decoration: InputDecoration(
-                  labelText: "Aniversário",
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime(2006, 8, 12),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                      );
-                      if (pickedDate != null) {
-                        setState(() {
-                          aniversarioController.text =
-                              "${pickedDate.day.toString().padLeft(2, '0')}/"
-                              "${pickedDate.month.toString().padLeft(2, '0')}/"
-                              "${pickedDate.year}";
-                        });
-                      }
-                    },
-                  ),
+                  labelText: "Data de nascimento",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -474,23 +265,12 @@ class _ProfileState extends State<Profile> {
               ),
             ),
 
-            const SizedBox(height: 20),
-
-            // Botão salvar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveData,
-                  child: const Text("Salvar alterações"),
-                ),
-              ),
-            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
 
+      // 🔹 Barra inferior com correção do parâmetro
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         shape: const CircularNotchedRectangle(),
@@ -500,16 +280,19 @@ class _ProfileState extends State<Profile> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.person_outline),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Você já está na tela de usuário.'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
+  icon: const Icon(Icons.person_outline),
+  onPressed: () async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('usuarioEmail'); // pega o e-mail salvo
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Profile(email: email ?? ''),
+      ),
+    );
+  },
+),
+
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
@@ -544,12 +327,53 @@ class _ProfileState extends State<Profile> {
   Widget buildTextField(String label, TextEditingController controller) {
     return TextField(
       controller: controller,
+      readOnly: true,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
+    );
+  }
+
+  Widget buildDropdown(
+      String label, String? valor, List<String> opcoes) {
+    return DropdownButtonFormField<String>(
+      value: valor,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      items: opcoes
+          .map((op) => DropdownMenuItem(
+                value: op,
+                child: Text(op),
+              ))
+          .toList(),
+      onChanged: null,
+    );
+  }
+
+  Widget buildDropdownInt(
+      String label, int? valor, List<int> opcoes) {
+    return DropdownButtonFormField<int>(
+      value: valor,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      items: opcoes
+          .map((op) => DropdownMenuItem(
+                value: op,
+                child: Text(op.toString()),
+              ))
+          .toList(),
+      onChanged: null,
     );
   }
 }

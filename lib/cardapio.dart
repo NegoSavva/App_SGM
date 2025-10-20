@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:navegacao_entre_telas/main.dart';
 import 'package:navegacao_entre_telas/profile.dart';
 import 'package:navegacao_entre_telas/qrCode.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Modelo para PratoDTO
 class PratoDTO {
@@ -265,15 +266,23 @@ class _CardapioPageState extends State<CardapioPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                icon: const Icon(Icons.person_outline),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => Profile()),
-                  );
-                },
-              ),
+            IconButton(
+  icon: const Icon(Icons.person_outline),
+  onPressed: () async {
+    // 1️⃣ Pega o e-mail salvo no SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('usuarioEmail');
+
+    // 2️⃣ Navega para a tela de Profile passando o e-mail
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Profile(email: email ?? ''),
+      ),
+    );
+  },
+),
+
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
