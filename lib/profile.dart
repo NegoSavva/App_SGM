@@ -48,7 +48,9 @@ class _ProfileState extends State<Profile> {
   }
 
   void _carregarDadosPorEmail() {
-    if (widget.email == 'RM90322@estudante.fieb.edu.br') {
+    final email = widget.email.trim();
+
+    if (email == 'RM90322' || email == 'RM90322@estudante.fieb.edu.br') {
       nomeController.text = "João Vitor Macena Nicolay";
       aniversarioController.text = "06/06/2007";
       cursoSelecionado = "Informática";
@@ -58,7 +60,7 @@ class _ProfileState extends State<Profile> {
       _profileImageBytes = null;
       _profileImageFile = null;
       _avatarAsset = 'assets/images/pfp1.jpg'; // Foto para João
-    } else if (widget.email == 'RM90331@estudante.fieb.edu.br') {
+    } else if (email == 'RM90331' || email == 'RM90331@estudante.fieb.edu.br') {
       nomeController.text = "Kaun Alves Chocair";
       aniversarioController.text = "25/04/2007";
       cursoSelecionado = "Informática";
@@ -67,7 +69,7 @@ class _ProfileState extends State<Profile> {
       periodoSelecionado = "Manhã";
       _profileImageBytes = null;
       _profileImageFile = null;
-      _avatarAsset = 'assets/images/pfp2.jpg'; // Foto para Gustavo
+      _avatarAsset = 'assets/images/pfp2.jpg'; // Foto para Kaun
     } else {
       nomeController.text = "Usuário Desconhecido";
       aniversarioController.text = "--/--/----";
@@ -139,8 +141,8 @@ class _ProfileState extends State<Profile> {
                 ),
                 SafeArea(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -218,6 +220,7 @@ class _ProfileState extends State<Profile> {
                           children: [
                             DropdownButtonFormField<String>(
                               value: cursoSelecionado,
+                              icon: const SizedBox.shrink(), // remove seta
                               decoration: InputDecoration(
                                 labelText: "Curso",
                                 border: OutlineInputBorder(
@@ -235,6 +238,7 @@ class _ProfileState extends State<Profile> {
                             const SizedBox(height: 10),
                             DropdownButtonFormField<String>(
                               value: turmaSelecionada,
+                              icon: const SizedBox.shrink(), // remove seta
                               decoration: InputDecoration(
                                 labelText: "Turma",
                                 border: OutlineInputBorder(
@@ -256,6 +260,7 @@ class _ProfileState extends State<Profile> {
                             Expanded(
                               child: DropdownButtonFormField<String>(
                                 value: cursoSelecionado,
+                                icon: const SizedBox.shrink(), // remove seta
                                 decoration: InputDecoration(
                                   labelText: "Curso",
                                   border: OutlineInputBorder(
@@ -275,6 +280,7 @@ class _ProfileState extends State<Profile> {
                             Expanded(
                               child: DropdownButtonFormField<String>(
                                 value: turmaSelecionada,
+                                icon: const SizedBox.shrink(), // remove seta
                                 decoration: InputDecoration(
                                   labelText: "Turma",
                                   border: OutlineInputBorder(
@@ -302,6 +308,7 @@ class _ProfileState extends State<Profile> {
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       value: serieSelecionada,
+                      icon: const SizedBox.shrink(), // remove seta
                       decoration: InputDecoration(
                         labelText: "Série",
                         border: OutlineInputBorder(
@@ -321,6 +328,7 @@ class _ProfileState extends State<Profile> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: periodoSelecionado,
+                      icon: const SizedBox.shrink(), // remove seta
                       decoration: InputDecoration(
                         labelText: "Período",
                         border: OutlineInputBorder(
@@ -367,7 +375,6 @@ class _ProfileState extends State<Profile> {
               IconButton(
                 icon: const Icon(Icons.person_outline),
                 onPressed: () async {
-                  // já está na tela de perfil
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Você já está na tela de usuário.'),

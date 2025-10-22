@@ -38,7 +38,7 @@ class LoginAnimationPage extends StatefulWidget {
 
 class _LoginAnimationPageState extends State<LoginAnimationPage> {
   bool _showLogin = false;
-  bool _obscureSenha = true; // controla a visibilidade da senha
+  bool _obscureSenha = true;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
@@ -74,6 +74,12 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
     }
   }
 
+  bool _validarEmail(String email) {
+    // Aceita "RM" + 5 dígitos OU o e-mail completo institucional
+    final regex = RegExp(r'^(RM\d{5})(@estudante\.fieb\.edu\.br)?$');
+    return regex.hasMatch(email);
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -82,10 +88,14 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset('assets/images/ovo.png', fit: BoxFit.cover), // fundo com imagem
+          Image.asset(
+            'assets/images/FIEB.png',
+            fit: BoxFit.contain,
+            alignment: Alignment.center,
+          ),
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
-            child: Container(color: Colors.black.withOpacity(0.2)), // desfoque com opacidade
+            child: Container(color: Colors.black.withOpacity(0.2)),
           ),
           Center(
             child: Text(
@@ -106,9 +116,9 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
             height: height * 0.6,
             child: Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade100, // azul bebê para o container de login
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              decoration: const BoxDecoration(
+                color: Color(0xFF6BA4F8),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
               ),
               child: SingleChildScrollView(
                 child: Form(
@@ -130,7 +140,7 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
-                          labelText: 'E-mail',
+                          labelText: 'E-mail (Digite seu RM)',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -139,8 +149,8 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Informe seu e-mail';
-                          } else if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$').hasMatch(value)) {
-                            return 'E-mail inválido';
+                          } else if (!_validarEmail(value.trim())) {
+                            return 'Formato inválido. Use RM + 5 dígitos ou e-mail institucional.';
                           }
                           return null;
                         },
@@ -150,14 +160,16 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
                         controller: _senhaController,
                         obscureText: _obscureSenha,
                         decoration: InputDecoration(
-                          labelText: 'Senha',
+                          labelText: 'Senha (8 dígitos)',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureSenha ? Icons.visibility : Icons.visibility_off,
+                              _obscureSenha
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
                             onPressed: () {
                               setState(() {
@@ -169,8 +181,8 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Informe sua senha';
-                          } else if (value.length < 6) {
-                            return 'A senha deve ter ao menos 6 caracteres';
+                          } else if (value.length != 8) {
+                            return 'A senha deve ter exatamente 8 caracteres';
                           }
                           return null;
                         },
@@ -188,7 +200,7 @@ class _LoginAnimationPageState extends State<LoginAnimationPage> {
                           'Entrar',
                           style: TextStyle(fontSize: 18),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -227,9 +239,9 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       emailUsuario = email;
 
-      if (email == 'RM90322@estudante.fieb.edu.br') {
+      if (email == 'RM90322@estudante.fieb.edu.br' || email == 'RM90322') {
         primeiroNome = 'João';
-      } else if (email == 'RM90331@estudante.fieb.edu.br') {
+      } else if (email == 'RM90331@estudante.fieb.edu.br' || email == 'RM90331') {
         primeiroNome = 'Kaun';
       } else {
         primeiroNome = 'Usuário';
@@ -265,7 +277,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       "Bem-vindo, $primeiroNome!",
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                     const SizedBox(height: 4),
                     const Text(
@@ -298,7 +311,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const DesperdicioZeroPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const DesperdicioZeroPage()),
                     );
                   },
                 ),
@@ -310,7 +324,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const AvaliacaoPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const AvaliacaoPage()),
                     );
                   },
                 ),
@@ -322,7 +337,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const CardapioPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const CardapioPage()),
                     );
                   },
                 ),

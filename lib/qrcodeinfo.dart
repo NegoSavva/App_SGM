@@ -69,7 +69,7 @@ class QrcodeInfoPage extends StatelessWidget {
 
           // QR CODE
           Image.asset(
-            'assets/images/cod.png',
+            'assets/images/frame.png',
             width: 180,
             height: 180,
           ),
